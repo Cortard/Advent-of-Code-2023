@@ -178,8 +178,7 @@ void getMaps(FILE* stream,Range** maps,int nbMap){
 
 unsigned long long  reverseMap(Range* map,unsigned long long seedValue){
     Range* current=map;
-    while(current && current->dest < seedValue){
-        printf("~~%llu %llu %llu %llu\n",seedValue,current->dest,current->src,current->len);
+    while(current && current->dest <= seedValue){
         if( seedValue < current->dest+current->len )
             return seedValue-current->dest+current->src;
         current=current->next;
@@ -198,7 +197,7 @@ int existSeed(Seed* seeds, unsigned long long seedValue){
 }
 
 int exist(Range** maps, int nbMap, Seed * seeds, unsigned long long seedValue){
-    for(int i=nbMap; i>=0; --i){
+    for(int i=nbMap-1; i>=0; --i){
         seedValue=reverseMap(maps[i],seedValue);
     }
     return existSeed(seeds, seedValue);
@@ -211,19 +210,10 @@ int main() {
     FILE *stream;
     stream = fopen("../input.txt", "r");
     if (!stream) return -1;
-    printf("File open\n");
 
     Seed* seeds;
     unsigned long long minLength=0;
     getSeeds(stream,&seeds,&minLength);
-    {
-        printf("Seeds :\n");
-        Seed *current = seeds;
-        while (current) {
-            printf("%llu %llu\n", current->start, current->len);
-            current = current->next;
-        }
-    }
 
     Range* maps[7];
     int nbMap=7;
@@ -231,16 +221,9 @@ int main() {
 
     fclose(stream);
 
-    for(int i=0;i<nbMap;++i){
-        printf("Map %d :\n",i);
-        Range* current=maps[i];
-        while (current){
-            printf("%llu %llu %llu\n",current->dest,current->src,current->len);
-            current=current->next;
-        }
-    }
-
-    printf("%d : %d\n",46, exist(maps,nbMap,seeds,46));
+    unsigned long long b=0;
+    while(!exist(maps,nbMap,seeds,b)) b+=1;
+    printf("b=%llu\n",b);
 
     gettimeofday(&end, NULL);
     printf("Time taken: %f seconds\n", ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec))/ 1e6);
